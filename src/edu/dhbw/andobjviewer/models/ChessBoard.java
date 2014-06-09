@@ -28,7 +28,8 @@ public class ChessBoard extends Model3D {
 
 	private List<Piece> pieces = new ArrayList<Piece>();
 	private PieceMarker pieceMarker = new PieceMarker();
-
+	Projector projector = new Projector();
+	
 	float boxf[] = {
 			
 			-1.0f, -1.0f, 0.0f,
@@ -95,10 +96,8 @@ public class ChessBoard extends Model3D {
 	private FloatBuffer diffuseLightBuffer1 = GraphicsUtil.makeFloatBuffer(diffuselight1);
 	private FloatBuffer ambientLightBuffer1 = GraphicsUtil.makeFloatBuffer(ambientlight1);	
 	
-	Projector projector = new Projector();
-	
 	private Resources resources;
-
+	Point xy = new Point();
 	private Model3D selectedPiece;
 
 	public ChessBoard(Resources resources) {
@@ -228,14 +227,15 @@ public class ChessBoard extends Model3D {
 	 */
 	public final void draw(GL10 gl) {
 
-		super.draw(gl);		
+		super.draw(gl);
 		projector.setViewport(gl);
-		Point xy = projector.getScreenCoords(getTransMatrix(), gl);
+		xy = projector.getScreenCoords(getTransMatrix(), gl);
 		
-		gl.glTranslatef(100.0f, 0.0f, 0.0f);
+		
+		gl.glTranslatef(150.0f, 0.0f, 0.0f);
 		gl.glDisable(GL10.GL_TEXTURE_2D);
 		gl.glPushMatrix();
-
+		
 		// desenha tabuleiro
 		gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
 		gl.glEnableClientState(GL10.GL_NORMAL_ARRAY);
@@ -277,17 +277,13 @@ public class ChessBoard extends Model3D {
 		gl.glMaterialfv(GL10.GL_FRONT_AND_BACK, GL10.GL_DIFFUSE, mat_diffuse);
 		gl.glMaterialfv(GL10.GL_FRONT_AND_BACK, GL10.GL_SHININESS, mat_flash_shiny);
 		
+		
 		for (Piece piece : getPieces()) {
 			gl.glScalef(scale, scale, scale);
 			gl.glTranslatef(piece.getPosition().getX() + 1, piece.getPosition().getY(), zpos);
 			gl.glRotatef(xrot, 1, 0, 0);
 			gl.glRotatef(yrot, 0, 1, 0);
 			gl.glRotatef(zrot, 0, 0, 1);
-			
-			if (getPieceMarker().xpos == xy.x){
-				piece.setSelected(true);
-				gl.glTranslatef(piece.getPosition().getX() + 5, piece.getPosition().getY() + 5, zpos);
-			}
 			
 			// first draw non textured groups
 			gl.glDisable(GL10.GL_TEXTURE_2D);
@@ -347,10 +343,9 @@ public class ChessBoard extends Model3D {
 		gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
 		gl.glPopMatrix();
 		
-		
-		if (getPieceMarker().xpos == xy.x){
-			gl.glTranslatef(getPieceMarker().xpos, getPieceMarker().ypos, getPieceMarker().zpos);
-		}	
+//		if (getPieceMarker().xy.x == xy.x && getPieceMarker().xy.y == xy.y){
+//			gl.glTranslatef(getPieceMarker().xy.x, getPieceMarker().xy.y, zpos);
+//		}
 		
 	}
 
