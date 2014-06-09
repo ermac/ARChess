@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/196/trunk/AndARModelViewer/libs/armeabi
+END
+libar.so
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/196/trunk/AndARModelViewer/libs/armeabi/libar.so
+END
+libyuv420sp2rgb.so
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/164/trunk/AndARModelViewer/libs/armeabi/libyuv420sp2rgb.so
+END
