@@ -343,9 +343,9 @@ public class ChessBoard extends Model3D {
 		gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
 		gl.glPopMatrix();
 		
-//		if (getPieceMarker().xy.x == xy.x && getPieceMarker().xy.y == xy.y){
-//			gl.glTranslatef(getPieceMarker().xy.x, getPieceMarker().xy.y, zpos);
-//		}
+		if (getPieceMarker().xy.x == xy.x && getPieceMarker().xy.y == xy.y){
+			gl.glTranslatef(getPieceMarker().xy.x, getPieceMarker().xy.y, zpos);
+		}
 		
 	}
 
