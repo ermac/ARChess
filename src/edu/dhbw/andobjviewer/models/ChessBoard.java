@@ -227,10 +227,7 @@ public class ChessBoard extends Model3D {
 	 */
 	public final void draw(GL10 gl) {
 
-		super.draw(gl);
-		projector.setViewport(gl);
-		xy = projector.getScreenCoords(getTransMatrix(), gl);
-		
+		super.draw(gl);		
 		
 		gl.glTranslatef(150.0f, 0.0f, 0.0f);
 		gl.glDisable(GL10.GL_TEXTURE_2D);
@@ -267,6 +264,9 @@ public class ChessBoard extends Model3D {
 		gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
 		gl.glPopMatrix();
 		
+		projector.setViewport(gl);
+		xy = projector.getScreenCoords(getTransMatrix(), gl);
+		
 		/*desenha as peças*/
 		gl.glPushMatrix();
 		gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
@@ -277,13 +277,16 @@ public class ChessBoard extends Model3D {
 		gl.glMaterialfv(GL10.GL_FRONT_AND_BACK, GL10.GL_DIFFUSE, mat_diffuse);
 		gl.glMaterialfv(GL10.GL_FRONT_AND_BACK, GL10.GL_SHININESS, mat_flash_shiny);
 		
-		
 		for (Piece piece : getPieces()) {
 			gl.glScalef(scale, scale, scale);
 			gl.glTranslatef(piece.getPosition().getX() + 1, piece.getPosition().getY(), zpos);
 			gl.glRotatef(xrot, 1, 0, 0);
 			gl.glRotatef(yrot, 0, 1, 0);
 			gl.glRotatef(zrot, 0, 0, 1);
+			
+			if (getPieceMarker().xy.equals(xy)){
+				gl.glTranslatef(piece.getPosition().getX() + 100, piece.getPosition().getX() + 100, zpos);
+			}
 			
 			// first draw non textured groups
 			gl.glDisable(GL10.GL_TEXTURE_2D);
@@ -343,9 +346,6 @@ public class ChessBoard extends Model3D {
 		gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
 		gl.glPopMatrix();
 		
-		if (getPieceMarker().xy.x == xy.x && getPieceMarker().xy.y == xy.y){
-			gl.glTranslatef(getPieceMarker().xy.x, getPieceMarker().xy.y, zpos);
-		}
 		
 	}
 
