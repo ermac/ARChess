@@ -118,6 +118,7 @@ public class ChessBoard extends Model3D {
 	private Model3D selectedPiece;
 	private float L = 2.0f;
 	ArrayList<Square> squares = new ArrayList<Square>();
+	Rect c = new Rect(bottomleftp.x, topleftp.y, toprightp.x, bottomrightp.y);
 
 	public ChessBoard(Resources resources) {
 		// TODO Auto-generated constructor stub
@@ -254,19 +255,19 @@ public class ChessBoard extends Model3D {
 	
 	public void calculateSquareProjections(GL10 gl){
 		GL11 gl11 = (GL11) gl;
-		  Projector projectorSquare = new Projector();
-		  projectorSquare.setViewport(gl11); 
-		  
-		  gl11.glPushMatrix();
-		  gl11.glTranslatef(-1,-1,0);
-		  bottomleftp = projectorSquare.getScreenCoords(getTransMatrix(), gl11);
-		  gl11.glTranslatef(L,0,0);
-		  bottomrightp = projectorSquare.getScreenCoords(getTransMatrix(), gl11);
-		  gl11.glTranslatef(0,L,0);
-		  toprightp = projectorSquare.getScreenCoords(getTransMatrix(), gl11); 
-		  gl11.glTranslatef(-L,0,0);
-		  topleftp = projectorSquare.getScreenCoords(getTransMatrix(), gl11);
-		  gl11.glPopMatrix();
+		Projector projectorSquare = new Projector();
+		projectorSquare.setViewport(gl11); 
+		
+		gl11.glPushMatrix();
+		gl11.glTranslatef(-1,-1,0);
+		bottomleftp = projectorSquare.getScreenCoords(getTransMatrix(), gl11);
+		gl11.glTranslatef(L,0,0);
+		bottomrightp = projectorSquare.getScreenCoords(getTransMatrix(), gl11);
+		gl11.glTranslatef(0,L,0);
+		toprightp = projectorSquare.getScreenCoords(getTransMatrix(), gl11); 
+		gl11.glTranslatef(-L,0,0);
+		topleftp = projectorSquare.getScreenCoords(getTransMatrix(), gl11);
+		gl11.glPopMatrix();
 
 	}
 	
@@ -312,11 +313,9 @@ public class ChessBoard extends Model3D {
 				gl.glNormalPointer(GL10.GL_FLOAT, 0, normals);
 				calculateSquareProjections(gl);
 				gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
-				point = projector.getScreenCoords(getTransMatrix(), gl);
 				Rect a = new Rect(bottomleftp.x, topleftp.y, toprightp.x, bottomrightp.y);
 				Rect b = new Rect(getPieceMarker().pointPM.x,getPieceMarker().pointPM.y,
 						getPieceMarker().pointPM.x,getPieceMarker().pointPM.y);
-				Rect c = new Rect(bottomleftp.x, topleftp.y, toprightp.x, bottomrightp.y);
 				
 				int k = 90000;
 				if (Rect.intersects(a, b) && piece != null) {
@@ -328,12 +327,12 @@ public class ChessBoard extends Model3D {
 					}
 				}	
 				
-				// long startTime = System.currentTimeMillis();
-				// long elapsedTime = 0L;
-				// while (elapsedTime < 2*60*10) {
-				// //perform db poll/check
-				// elapsedTime = (new Date()).getTime() - startTime;
-				// }
+				long startTime = System.currentTimeMillis();
+				long elapsedTime = 0L;
+				while (elapsedTime < 2 * 60 * 10) {
+					// perform db poll/check
+					elapsedTime = (new Date()).getTime() - startTime;
+				}
 				
 				gl.glTranslatef(L, 0.0f, 0.0f);
 				even = !even;
