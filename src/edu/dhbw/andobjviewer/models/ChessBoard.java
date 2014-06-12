@@ -34,7 +34,14 @@ import edu.dhbw.andobjviewer.util.BaseFileUtil;
 public class ChessBoard extends Model3D {
 
 	private PieceMarker pieceMarker = new PieceMarker();
-	Projector projector = new Projector();
+	private Projector projector = new Projector();
+	
+	
+	private TimeSpan dTimeSpan; //start dragging time span
+	private boolean isDragging = false;
+	private Square dragginFrom;
+	private Rect pieceMarkerRect;
+	private Rect squareRect; 
 	
 	float boxf[] = {
 			
@@ -252,22 +259,27 @@ public class ChessBoard extends Model3D {
 	}
 
 	
-	public void calculateSquareProjections(GL10 gl){
+	public boolean canMove(GL10 gl){
 		GL11 gl11 = (GL11) gl;
-		  Projector projectorSquare = new Projector();
-		  projectorSquare.setViewport(gl11); 
-		  
-		  gl11.glPushMatrix();
-		  gl11.glTranslatef(-1,-1,0);
-		  bottomleftp = projectorSquare.getScreenCoords(getTransMatrix(), gl11);
-		  gl11.glTranslatef(L,0,0);
-		  bottomrightp = projectorSquare.getScreenCoords(getTransMatrix(), gl11);
-		  gl11.glTranslatef(0,L,0);
-		  toprightp = projectorSquare.getScreenCoords(getTransMatrix(), gl11); 
-		  gl11.glTranslatef(-L,0,0);
-		  topleftp = projectorSquare.getScreenCoords(getTransMatrix(), gl11);
-		  gl11.glPopMatrix();
+		Projector projectorSquare = new Projector();
+		projectorSquare.setViewport(gl11); 
+	  
+		gl11.glPushMatrix();
+		gl11.glTranslatef(-1,-1,0);
+		bottomleftp = projectorSquare.getScreenCoords(getTransMatrix(), gl11);
+		gl11.glTranslatef(L,0,0);
+		bottomrightp = projectorSquare.getScreenCoords(getTransMatrix(), gl11);
+		gl11.glTranslatef(0,L,0);
+		toprightp = projectorSquare.getScreenCoords(getTransMatrix(), gl11); 
+		gl11.glTranslatef(-L,0,0);
+		topleftp = projectorSquare.getScreenCoords(getTransMatrix(), gl11);
+		gl11.glPopMatrix();
 
+		Rect a = new Rect(bottomleftp.x, topleftp.y, toprightp.x, bottomrightp.y);
+		Rect b = new Rect(getPieceMarker().pointPM.x, getPieceMarker().pointPM.y,
+				getPieceMarker().pointPM.x, getPieceMarker().pointPM.y);
+		
+		return a.contains(b);
 	}
 	
 	public void movePiece(Square origin, Square destination){
@@ -275,6 +287,7 @@ public class ChessBoard extends Model3D {
 		origin.setPiece(null);
 	}
 
+	
 	/*
 	 * (non-Javadoc)
 	 * @see edu.dhbw.andar.ARObject#draw(javax.microedition.khronos.opengles.GL10)
@@ -299,9 +312,9 @@ public class ChessBoard extends Model3D {
 		for (int i = 0; i < 8; i++) {
 			boolean even = i % 2 == 0;
 			for (int j = 0; j < 8; j++) {
-				Piece piece = squares.get(i * 8 + j).getPiece();
-				if (piece != null) {
-				   piece.draw(gl);
+				Square square = squares.get(i * 8 + j);
+				if (square.hasPiece()) {
+				   square.getPiece().draw(gl);
 				}
 				gl.glEnable(GL10.GL_COLOR_MATERIAL);
 				if (even)
@@ -310,31 +323,12 @@ public class ChessBoard extends Model3D {
 					gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 				gl.glVertexPointer(3, GL10.GL_FLOAT, 0, box);
 				gl.glNormalPointer(GL10.GL_FLOAT, 0, normals);
-				calculateSquareProjections(gl);
 				gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
-				point = projector.getScreenCoords(getTransMatrix(), gl);
-				Rect a = new Rect(bottomleftp.x, topleftp.y, toprightp.x, bottomrightp.y);
-				Rect b = new Rect(getPieceMarker().pointPM.x,getPieceMarker().pointPM.y,
-						getPieceMarker().pointPM.x,getPieceMarker().pointPM.y);
-				Rect c = new Rect(bottomleftp.x, topleftp.y, toprightp.x, bottomrightp.y);
 				
-				int k = 90000;
-				if (Rect.intersects(a, b) && piece != null) {
-					while (k > 1){ 
-						if (Rect.intersects(a, b)){
-							movePiece(squares.get(i * 8 + j), squares.get(0));
-						}
-						k--;
-					}
+				if (canMove(gl)) {
+					movePiece(square, squares.get(0));
 				}	
-				
-				// long startTime = System.currentTimeMillis();
-				// long elapsedTime = 0L;
-				// while (elapsedTime < 2*60*10) {
-				// //perform db poll/check
-				// elapsedTime = (new Date()).getTime() - startTime;
-				// }
-				
+								
 				gl.glTranslatef(L, 0.0f, 0.0f);
 				even = !even;
 			}
