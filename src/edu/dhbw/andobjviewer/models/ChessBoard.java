@@ -264,11 +264,6 @@ public class ChessBoard extends Model3D {
 		GL11 gl11 = (GL11) gl;
 		Projector projectorSquare = new Projector();
 		projectorSquare.setViewport(gl11); 
-<<<<<<< HEAD
-		
-=======
-	  
->>>>>>> baa3877dcf4dc43df654a1b29844815dd7de0b5e
 		gl11.glPushMatrix();
 		gl11.glTranslatef(-1,-1,0);
 		bottomleftp = projectorSquare.getScreenCoords(getTransMatrix(), gl11);
@@ -335,31 +330,6 @@ public class ChessBoard extends Model3D {
 				gl.glVertexPointer(3, GL10.GL_FLOAT, 0, box);
 				gl.glNormalPointer(GL10.GL_FLOAT, 0, normals);
 				gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
-<<<<<<< HEAD
-				Rect a = new Rect(bottomleftp.x, topleftp.y, toprightp.x, bottomrightp.y);
-				Rect b = new Rect(getPieceMarker().pointPM.x,getPieceMarker().pointPM.y,
-						getPieceMarker().pointPM.x,getPieceMarker().pointPM.y);
-				
-				int k = 90000;
-				if (Rect.intersects(a, b) && piece != null) {
-					while (k > 1){ 
-						if (Rect.intersects(a, b)){
-							movePiece(squares.get(i * 8 + j), squares.get(0));
-						}
-						k--;
-					}
-				}	
-				
-				long startTime = System.currentTimeMillis();
-				long elapsedTime = 0L;
-				while (elapsedTime < 2 * 60 * 10) {
-					// perform db poll/check
-					elapsedTime = (new Date()).getTime() - startTime;
-				}
-				
-=======
-
->>>>>>> baa3877dcf4dc43df654a1b29844815dd7de0b5e
 				gl.glTranslatef(L, 0.0f, 0.0f);
 				even = !even;
 			}
