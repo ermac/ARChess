@@ -320,19 +320,14 @@ public class ChessBoard extends Model3D {
 				
 				int k = 90000;
 				if (Rect.intersects(a, b) && piece != null) {
-					while (k > 1 && Rect.intersects(a, b) ){ 
+					while (k > 1){ 
 						if (Rect.intersects(a, b)){
 							movePiece(squares.get(i * 8 + j), squares.get(0));
 						}
 						k--;
 					}
 				}	
-				while (k > 1 && Rect.intersects(a, b) ){ 
-					if (Rect.intersects(a, b)){
-						movePiece(squares.get(0), squares.get(i * 8 + j));
-					}
-					k--;
-				}
+				
 				// long startTime = System.currentTimeMillis();
 				// long elapsedTime = 0L;
 				// while (elapsedTime < 2*60*10) {
