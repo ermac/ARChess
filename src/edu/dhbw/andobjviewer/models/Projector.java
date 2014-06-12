@@ -21,7 +21,31 @@ public class Projector {
 		gl11.glGetFloatv(GL11.GL_MODELVIEW_MATRIX, modelview, 0);
 		gl11.glGetFloatv(GL11.GL_PROJECTION_MATRIX, projection, 0);
 
+		 GLU.gluProject((float) transMat[0], (float) transMat[1],(float) transMat[2], modelview, 0, projection, 0, viewport, 0, vector, 0);
+
+		Point p = new Point((int) vector[0], (int) (viewport[3] - vector[1]));
+		return p;
+	}
+	
+	public synchronized Point getScreenCoords(float[] transMat, GL10 gl) {
+		GL11 gl11 = (GL11) gl;
+
+		gl11.glGetFloatv(GL11.GL_MODELVIEW_MATRIX, modelview, 0);
+		gl11.glGetFloatv(GL11.GL_PROJECTION_MATRIX, projection, 0);
+
 		GLU.gluProject((float) transMat[0], (float) transMat[1],(float) transMat[1], modelview, 0, projection, 0, viewport, 0, vector, 0);
+
+		Point p = new Point((int) vector[0], (int) (viewport[3] - vector[1]));
+		return p;
+	}
+	
+	public synchronized Point getScreenCoords(GL10 gl) {
+		GL11 gl11 = (GL11) gl;
+
+		gl11.glGetFloatv(GL11.GL_MODELVIEW_MATRIX, modelview, 0);
+		gl11.glGetFloatv(GL11.GL_PROJECTION_MATRIX, projection, 0);
+
+		GLU.gluProject(0,0,0, modelview, 0, projection, 0, viewport, 0, vector, 0);
 
 		Point p = new Point((int) vector[0], (int) (viewport[3] - vector[1]));
 		return p;

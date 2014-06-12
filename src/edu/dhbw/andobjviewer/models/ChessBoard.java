@@ -5,16 +5,23 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.microedition.khronos.opengles.GL10;
+import javax.microedition.khronos.opengles.GL11;
 
+import android.content.Loader.ForceLoadContentObserver;
 import android.content.res.Resources;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.opengl.GLDebugHelper;
 import android.opengl.GLUtils;
 import android.os.Debug;
+import android.util.Log;
 
 import edu.dhbw.andar.util.GraphicsUtil;
 import edu.dhbw.andobjviewer.Config;
@@ -26,7 +33,6 @@ import edu.dhbw.andobjviewer.util.BaseFileUtil;
 
 public class ChessBoard extends Model3D {
 
-	private List<Piece> pieces = new ArrayList<Piece>();
 	private PieceMarker pieceMarker = new PieceMarker();
 	Projector projector = new Projector();
 	
@@ -96,9 +102,22 @@ public class ChessBoard extends Model3D {
 	private FloatBuffer diffuseLightBuffer1 = GraphicsUtil.makeFloatBuffer(diffuselight1);
 	private FloatBuffer ambientLightBuffer1 = GraphicsUtil.makeFloatBuffer(ambientlight1);	
 	
+	private float[] model = new float[16];
+	private float[] topleft = new float[16]; 
+	private float[] topright = new float[16]; 
+	private float[] bottomright = new float[16];
+	private float[] bottomleft = new float[16];
+	
+	private Point topleftp;
+	private Point toprightp;
+	private Point bottomrightp;
+	private Point bottomleftp;
+	
 	private Resources resources;
-	Point xy = new Point();
+	Point point = new Point();
 	private Model3D selectedPiece;
+	private float L = 2.0f;
+	ArrayList<Square> squares = new ArrayList<Square>();
 
 	public ChessBoard(Resources resources) {
 		// TODO Auto-generated constructor stub
@@ -106,9 +125,9 @@ public class ChessBoard extends Model3D {
 		this.resources = resources;
 	}
 	
-	public void reset() {
-		pieces.clear();
-	}
+//	public void reset() {
+//		pieces.clear();
+//	}
 
 	/*
 	 * Adiciona peças na lista de peças, setando posições
@@ -116,22 +135,20 @@ public class ChessBoard extends Model3D {
 	 * na lista conforme seu tipo.
 	 */
 	public void populate() {
-		addPiece(new Piece(PieceType.PAWN, "peao5", new Position(0, 0), true,
-				false));
-//		addPiece(new Piece(PieceType.PAWN, "peao2", new Position(-5, 0), true,
-//				false));
-//		addPiece(new Piece(PieceType.PAWN, "peao3", new Position(-10, 0), true,
-//				false));
-//		addPiece(new Piece(PieceType.PAWN, "peao4", new Position(-15, 0), true,
-//				false));
-//		addPiece(new Piece(PieceType.PAWN, "peao5", new Position(-20, 0), true,
-//				false));
-//		addPiece(new Piece(PieceType.PAWN, "peao2", new Position(-25, 0), true,
-//				false));
-//		addPiece(new Piece(PieceType.PAWN, "peao3", new Position(-30, 0), true,
-//				false));
-//		addPiece(new Piece(PieceType.PAWN, "peao4", new Position(-35, 0), true,
-//				false));
+		for (int i = 0; i < 8; i ++){
+			for (int j = 0; j < 8; j ++){
+				Square s = new Square(new Position(i,j));
+				squares.add(s);
+			}
+		}
+		
+//		addPiece(new Piece(PieceType.PAWN, "peao5", true, false), new Position(0, 0));
+//		addPiece(new Piece(PieceType.PAWN, "peao5", true, false), new Position(0, 7));
+//		addPiece(new Piece(PieceType.PAWN, "peao2", true, false), new Position(7, 0));
+		addPiece(new Piece(PieceType.PAWN, "peao3", true, false), new Position(7, 7));
+//		addPiece(new Piece(PieceType.PAWN, "peao4", true, false), new Position(4, 0));
+//		addPiece(new Piece(PieceType.PAWN, "peao5", true, false), new Position(5, 0));
+//		addPiece(new Piece(PieceType.PAWN, "peao2", true, false), new Position(6, 0));
 
 		BaseFileUtil fileUtil = null;
 		fileUtil = new AssetsFileUtil(resources.getAssets());
@@ -161,22 +178,26 @@ public class ChessBoard extends Model3D {
 		}
 	}
 
-	public Piece getPiece(int x, int y) {
-		// retorna a peça do tabuleiro na posição x,y
-		return null;
-	}
+//	public Piece getPiece(int x, int y) {
+//		// retorna a peça do tabuleiro na posição x,y
+//		return null;
+//	}
 
 	public Model3D getSelectedPiece() {
 		return selectedPiece;
-
 	}
 
-	public void addPiece(Piece piece) {
-		pieces.add(piece);
+	public void addPiece(Piece piece, Position position) {
+		squares.get(position.y * 8 + position.x).setPiece(piece);
 	}
 
 	public List<Piece> getPieces() {
-		return pieces;
+		List<Piece> list = new ArrayList<Piece>();
+		for (Square s : squares){
+			if (s.getPiece() != null)
+				list.add(s.getPiece());
+		}
+		return list;
 	}
 
 	/*
@@ -214,12 +235,46 @@ public class ChessBoard extends Model3D {
 							GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
 				}
 			}
-
 		}
 
 		// transfer vertices to video memory
 	}
 	
+	float[] toFloatArray(double[] arr) {
+		  if (arr == null) return null;
+		  int n = arr.length;
+		  float[] ret = new float[n];
+		  
+		  for (int i = 0; i < n; i++) {
+			  ret[i] = (float)arr[i];
+		  }
+		  return ret;
+	}
+
+	
+	public void calculateSquareProjections(GL10 gl){
+		GL11 gl11 = (GL11) gl;
+		  Projector projectorSquare = new Projector();
+		  projectorSquare.setViewport(gl11); 
+		  
+		  gl11.glPushMatrix();
+		  gl11.glTranslatef(-1,-1,0);
+		  bottomleftp = projectorSquare.getScreenCoords(getTransMatrix(), gl11);
+		  gl11.glTranslatef(L,0,0);
+		  bottomrightp = projectorSquare.getScreenCoords(getTransMatrix(), gl11);
+		  gl11.glTranslatef(0,L,0);
+		  toprightp = projectorSquare.getScreenCoords(getTransMatrix(), gl11); 
+		  gl11.glTranslatef(-L,0,0);
+		  topleftp = projectorSquare.getScreenCoords(getTransMatrix(), gl11);
+		  gl11.glPopMatrix();
+
+	}
+	
+	public void movePiece(Square origin, Square destination){
+		destination.setPiece(origin.getPiece());
+		origin.setPiece(null);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see edu.dhbw.andar.ARObject#draw(javax.microedition.khronos.opengles.GL10)
@@ -227,125 +282,76 @@ public class ChessBoard extends Model3D {
 	 */
 	public final void draw(GL10 gl) {
 
-		super.draw(gl);		
+		super.draw(gl);
+		projector.setViewport(gl);
 		
 		gl.glTranslatef(150.0f, 0.0f, 0.0f);
 		gl.glDisable(GL10.GL_TEXTURE_2D);
-		gl.glPushMatrix();
-		
-		// desenha tabuleiro
-		gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-		gl.glEnableClientState(GL10.GL_NORMAL_ARRAY);
-		gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
-		gl.glEnable(GL10.GL_COLOR_MATERIAL);
-
+				
 		/*Aumenta a escala do tabuleiro*/
-		gl.glScalef(25f, 25f, 0f);
-		gl.glVertexPointer(3, GL10.GL_FLOAT, 0, box);
-		gl.glNormalPointer(GL10.GL_FLOAT, 0, normals);
-		gl.glColorPointer(4, GL10.GL_FLOAT, 0, colors);
-		gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
-		gl.glTranslatef(2.0f, 0.0f, 0.0f);
-		gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 4, 4);
-		gl.glTranslatef(2.0f, 0.0f, 0.0f);
-		gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
-		gl.glTranslatef(2.0f, 0.0f, 0.0f);
-		gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 4, 4);
-		gl.glTranslatef(2.0f, 0.0f, 0.0f);
-		gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
-		gl.glTranslatef(2.0f, 0.0f, 0.0f);
-		gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 4, 4);
-		gl.glTranslatef(2.0f, 0.0f, 0.0f);
-		gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
-		gl.glTranslatef(2.0f, 0.0f, 0.0f);
-		gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 4, 4);
-		gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
-		gl.glDisableClientState(GL10.GL_NORMAL_ARRAY);
-		gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
-		gl.glPopMatrix();
+		gl.glScalef(25f, 25f, 25f);
 		
-		projector.setViewport(gl);
-		xy = projector.getScreenCoords(getTransMatrix(), gl);
-		
-		/*desenha as peças*/
-		gl.glPushMatrix();
 		gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
 		gl.glEnableClientState(GL10.GL_NORMAL_ARRAY);
-		gl.glDisable(GL10.GL_COLOR_MATERIAL);
-		gl.glMaterialfv(GL10.GL_FRONT_AND_BACK, GL10.GL_SPECULAR, mat_flash);
-		gl.glMaterialfv(GL10.GL_FRONT_AND_BACK, GL10.GL_AMBIENT, mat_ambient);
-		gl.glMaterialfv(GL10.GL_FRONT_AND_BACK, GL10.GL_DIFFUSE, mat_diffuse);
-		gl.glMaterialfv(GL10.GL_FRONT_AND_BACK, GL10.GL_SHININESS, mat_flash_shiny);
+		gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
 		
-		for (Piece piece : getPieces()) {
-			gl.glScalef(scale, scale, scale);
-			gl.glTranslatef(piece.getPosition().getX() + 1, piece.getPosition().getY(), zpos);
-			gl.glRotatef(xrot, 1, 0, 0);
-			gl.glRotatef(yrot, 0, 1, 0);
-			gl.glRotatef(zrot, 0, 0, 1);
-			
-			if (getPieceMarker().xy.equals(xy)){
-				gl.glTranslatef(piece.getPosition().getX() + 100, piece.getPosition().getX() + 100, zpos);
-			}
-			
-			// first draw non textured groups
-			gl.glDisable(GL10.GL_TEXTURE_2D);
-			int cnt = piece.nonTexturedGroups.length;
-			for (int i = 0; i < cnt; i++) {
-				Group group = piece.nonTexturedGroups[i];
-				Material mat = group.getMaterial();
-				if (mat != null) {
-					gl.glMaterialfv(GL10.GL_FRONT_AND_BACK, GL10.GL_SPECULAR,
-							mat_flash);
-					gl.glMaterialfv(GL10.GL_FRONT_AND_BACK, GL10.GL_AMBIENT,
-							mat_ambient);
-					gl.glMaterialfv(GL10.GL_FRONT_AND_BACK, GL10.GL_DIFFUSE,
-							mat_diffuse);
-					gl.glMaterialfv(GL10.GL_FRONT_AND_BACK, GL10.GL_SHININESS,
-							mat_flash_shiny);
+		gl.glPushMatrix();
+		for (int i = 0; i < 8; i++) {
+			boolean even = i % 2 == 0;
+			for (int j = 0; j < 8; j++) {
+				Piece piece = squares.get(i * 8 + j).getPiece();
+				if (piece != null) {
+				   piece.draw(gl);
 				}
-				gl.glVertexPointer(3, GL10.GL_FLOAT, 0, group.vertices);
-				gl.glNormalPointer(GL10.GL_FLOAT, 0, group.normals);
-				gl.glDrawArrays(GL10.GL_TRIANGLES, 0, group.vertexCount);
-			}
-			
-			/*Caso haja Matirials*/
-			// now we can continue with textured ones
-			gl.glEnable(GL10.GL_TEXTURE_2D);
-			gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-
-			cnt = piece.texturedGroups.length;
-			for (int i = 0; i < cnt; i++) {
-				Group group = piece.texturedGroups[i];
-				Material mat = group.getMaterial();
-				if (mat != null) {
-					gl.glMaterialfv(GL10.GL_FRONT_AND_BACK, GL10.GL_SPECULAR,
-							mat.specularlight);
-					gl.glMaterialfv(GL10.GL_FRONT_AND_BACK, GL10.GL_AMBIENT,
-							mat.ambientlight);
-					gl.glMaterialfv(GL10.GL_FRONT_AND_BACK, GL10.GL_DIFFUSE,
-							mat.diffuselight);
-					gl.glMaterialf(GL10.GL_FRONT_AND_BACK, GL10.GL_SHININESS,
-							mat.shininess);
-					if (mat.hasTexture()) {
-						gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0,
-								group.texcoords);
-						gl.glBindTexture(GL10.GL_TEXTURE_2D, piece.textureIDs
-								.get(mat).intValue());
+				gl.glEnable(GL10.GL_COLOR_MATERIAL);
+				if (even)
+					gl.glColor4f(0.0f, 0.0f, 0.0f, 0.0f);
+				else
+					gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+				gl.glVertexPointer(3, GL10.GL_FLOAT, 0, box);
+				gl.glNormalPointer(GL10.GL_FLOAT, 0, normals);
+				calculateSquareProjections(gl);
+				gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
+				point = projector.getScreenCoords(getTransMatrix(), gl);
+				Rect a = new Rect(bottomleftp.x, topleftp.y, toprightp.x, bottomrightp.y);
+				Rect b = new Rect(getPieceMarker().pointPM.x,getPieceMarker().pointPM.y,
+						getPieceMarker().pointPM.x,getPieceMarker().pointPM.y);
+				Rect c = new Rect(bottomleftp.x, topleftp.y, toprightp.x, bottomrightp.y);
+				
+				int k = 90000;
+				if (Rect.intersects(a, b) && piece != null) {
+					while (k > 1 && Rect.intersects(a, b) ){ 
+						if (Rect.intersects(a, b)){
+							movePiece(squares.get(i * 8 + j), squares.get(0));
+						}
+						k--;
 					}
+				}	
+				while (k > 1 && Rect.intersects(a, b) ){ 
+					if (Rect.intersects(a, b)){
+						movePiece(squares.get(0), squares.get(i * 8 + j));
+					}
+					k--;
 				}
-				gl.glVertexPointer(3, GL10.GL_FLOAT, 0, group.vertices);
-				gl.glNormalPointer(GL10.GL_FLOAT, 0, group.normals);
-				gl.glDrawArrays(GL10.GL_TRIANGLES, 0, group.vertexCount);
-			}	
+				// long startTime = System.currentTimeMillis();
+				// long elapsedTime = 0L;
+				// while (elapsedTime < 2*60*10) {
+				// //perform db poll/check
+				// elapsedTime = (new Date()).getTime() - startTime;
+				// }
+				
+				gl.glTranslatef(L, 0.0f, 0.0f);
+				even = !even;
+			}
+			gl.glTranslatef(0.0f, L, 0.0f);
+			gl.glTranslatef(-L * 8, 0.0f, 0.0f);
 		}
+		gl.glPopMatrix();
 		
 		gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
 		gl.glDisableClientState(GL10.GL_NORMAL_ARRAY);
 		gl.glDisableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-		gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
-		gl.glPopMatrix();
-		
+			
 		
 	}
 
