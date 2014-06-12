@@ -22,7 +22,6 @@ import android.opengl.GLDebugHelper;
 import android.opengl.GLUtils;
 import android.os.Debug;
 import android.util.Log;
-
 import edu.dhbw.andar.util.GraphicsUtil;
 import edu.dhbw.andobjviewer.Config;
 import edu.dhbw.andobjviewer.graphics.Model3D;
@@ -30,6 +29,7 @@ import edu.dhbw.andobjviewer.parser.ObjParser;
 import edu.dhbw.andobjviewer.parser.ParseException;
 import edu.dhbw.andobjviewer.util.AssetsFileUtil;
 import edu.dhbw.andobjviewer.util.BaseFileUtil;
+
 
 public class ChessBoard extends Model3D {
 

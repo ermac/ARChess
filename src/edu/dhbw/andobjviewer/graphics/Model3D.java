@@ -33,7 +33,7 @@ import edu.dhbw.andar.ARObject;
 public abstract class Model3D extends ARObject implements Serializable {
 
 	// position/rotation/scale
-	public float xrot = 90;
+	public float xrot = 90; 
 	public float yrot = 0;
 	public float zrot = 0;
 	public float xpos = 0;
