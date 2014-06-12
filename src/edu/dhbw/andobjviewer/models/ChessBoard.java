@@ -125,7 +125,6 @@ public class ChessBoard extends Model3D {
 	private Model3D selectedPiece;
 	private float L = 2.0f;
 	ArrayList<Square> squares = new ArrayList<Square>();
-	Rect c = new Rect(bottomleftp.x, topleftp.y, toprightp.x, bottomrightp.y);
 
 	public ChessBoard(Resources resources) {
 		// TODO Auto-generated constructor stub
