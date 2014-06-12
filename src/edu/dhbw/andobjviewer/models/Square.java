@@ -25,6 +25,8 @@ public class Square{
 		this.piece = piece;
 	}
 	
-	
+	public boolean hasPiece() {
+		return this.piece != null;
+	}
 	
 }
