@@ -321,14 +321,16 @@ public class ChessBoard extends Model3D {
 					gl.glColor4f(0.0f, 0.0f, 0.0f, 0.0f);
 				else
 					gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+				
+				if (canMove(gl)) {
+					//movePiece(square, squares.get(0));
+					gl.glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
+				}	
+								
 				gl.glVertexPointer(3, GL10.GL_FLOAT, 0, box);
 				gl.glNormalPointer(GL10.GL_FLOAT, 0, normals);
 				gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
-				
-				if (canMove(gl)) {
-					movePiece(square, squares.get(0));
-				}	
-								
+
 				gl.glTranslatef(L, 0.0f, 0.0f);
 				even = !even;
 			}
