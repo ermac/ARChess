@@ -11,7 +11,11 @@ public class TimeSpan {
 		this.seconds = seconds;
 	}
 	
+	public void reset() {
+		time = System.currentTimeMillis();
+	}
+	
 	public boolean elapsedSeconds() {
-		return time - ((int) (time / 1000) % 60) > seconds; 
+		return ((int) ((System.currentTimeMillis() - time) / 1000) % 60) > seconds; 
 	}
 }
