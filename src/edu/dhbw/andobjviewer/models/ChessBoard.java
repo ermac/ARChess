@@ -37,9 +37,10 @@ public class ChessBoard extends Model3D {
 	private Projector projector = new Projector();
 	
 	
-	private TimeSpan dTimeSpan; //start dragging time span
-	private boolean isDragging = false;
-	private Square dragginFrom;
+	private TimeSpan dTimeSpan = new TimeSpan(2); //start dragging time span
+	private boolean isMoving = false;
+	private Square origin;
+	private Square destination;
 	private Rect pieceMarkerRect;
 	private Rect squareRect; 
 	
@@ -259,7 +260,7 @@ public class ChessBoard extends Model3D {
 	}
 
 	
-	public boolean canMove(GL10 gl){
+	public boolean intersectingSquare(GL10 gl){
 		GL11 gl11 = (GL11) gl;
 		Projector projectorSquare = new Projector();
 		projectorSquare.setViewport(gl11); 
@@ -321,10 +322,34 @@ public class ChessBoard extends Model3D {
 				else
 					gl.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 				
-				if (canMove(gl)) {
-					//movePiece(square, squares.get(0));
-					gl.glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
-				}	
+				if(isMoving) {
+					if (destination == square) {
+						if(dTimeSpan.elapsedSeconds()){
+							isMoving = false;
+							dTimeSpan.reset();
+							movePiece(origin, destination);
+						}
+					} else {
+						if (intersectingSquare(gl)) {
+							destination = square;
+							gl.glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
+							dTimeSpan.reset();
+						}	
+					}
+				} else {
+					if (origin == square) {
+						if(dTimeSpan.elapsedSeconds()){
+							isMoving = true;
+							dTimeSpan.reset();
+						}
+					} else {
+						if (intersectingSquare(gl)) {
+							origin = square;
+							gl.glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
+							dTimeSpan.reset();
+						}	
+					}
+				}
 								
 				gl.glVertexPointer(3, GL10.GL_FLOAT, 0, box);
 				gl.glNormalPointer(GL10.GL_FLOAT, 0, normals);
